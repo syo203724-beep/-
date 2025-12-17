@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天動説と地動説 - シネマティック ナレーション</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f4d03f;
+            --deep-space: #0a0a12;
+            --text-white: #f0f0f0;
+            --danger-red: #c62828;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #000;
+            color: var(--text-white);
+        }
+
+        /* Cinema Container */
+        #cinema {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        /* Scene System */
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease, visibility 1.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .scene.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scene.fade-out {
+            opacity: 0;
+        }
+
+        /* Background Images with Ken Burns Effect */
+        .scene-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transform: scale(1);
+            transition: transform 12s ease-out;
+            filter: brightness(0.5);
+        }
+
+        .scene.active .scene-bg {
+            transform: scale(1.15);
+        }
+
+        .scene-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                rgba(0,0,0,0.3) 0%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.7) 100%);
+        }
+
+        /* Scene Content */
+        .scene-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            padding: 40px;
+            text-align: center;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: transform 1s ease 0.5s, opacity 1s ease 0.5s;
+        }
+
+        .scene.active .scene-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .scene-title {
+            font-family: 'Cinzel', 'Noto Serif JP', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 30px;
+            text-shadow: 0 0 60px rgba(212, 175, 55, 0.5);
+            letter-spacing: 0.1em;
+        }
+
+        .scene-subtitle {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--text-white);
+            opacity: 0.9;
+            line-height: 1.8;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+        }
+
+        /* Quote Style */
+        .scene-quote {
+            font-family: 'Noto Serif JP', serif;
+            font-style: italic;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: var(--gold-light);
+            line-height: 2;
+            padding: 40px;
+            border-left: 4px solid var(--gold);
+            border-right: 4px solid var(--gold);
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+        }
+
+        /* Character Cards */
+        .character-cards {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .character-card {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--gold);
+            border-radius: 16px;
+            padding: 25px;
+            width: 280px;
+            backdrop-filter: blur(10px);
+            transform: translateY(50px);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .character-card:nth-child(1) { animation-delay: 0.3s; }
+        .character-card:nth-child(2) { animation-delay: 0.6s; }
+        .character-card:nth-child(3) { animation-delay: 0.9s; }
+
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .character-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .character-card h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .character-card p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Warning/Danger Scene */
+        .scene.danger .scene-bg::after {
+            background: linear-gradient(to bottom,
+                rgba(80,0,0,0.4) 0%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(80,0,0,0.6) 100%);
+        }
+
+        .danger-text {
+            color: var(--danger-red);
+            font-weight: 700;
+        }
+
+        /* Subtitle (Narration Text) */
+        #subtitle-container {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            width: 90%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        #subtitle {
+            display: inline-block;
+            background: rgba(0,0,0,0.85);
+            padding: 18px 35px;
+            border-radius: 8px;
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            line-height: 1.8;
+            color: var(--text-white);
+            font-family: 'Noto Sans JP', sans-serif;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #subtitle.show {
+            opacity: 1;
+        }
+
+        /* Video Controls */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.7));
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            gap: 20px;
+            z-index: 200;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            background: rgba(212,175,55,0.2);
+            color: var(--gold);
+            font-size: 1.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: var(--gold);
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        #progress-container {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        #time-display {
+            color: var(--text-white);
+            font-family: monospace;
+            font-size: 0.9rem;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        #scene-indicator {
+            color: var(--gold);
+            font-size: 0.9rem;
+            min-width: 80px;
+        }
+
+        /* Volume Control */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #volume-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Start Screen */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a1a, #1a1a2e);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            transition: opacity 1s, visibility 1s;
+        }
+
+        #start-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #start-screen h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            color: var(--gold);
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(212,175,55,0.5);
+        }
+
+        #start-screen p {
+            color: var(--text-white);
+            opacity: 0.8;
+            margin-bottom: 40px;
+            font-size: 1.2rem;
+        }
+
+        #start-btn {
+            padding: 18px 50px;
+            font-size: 1.2rem;
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(212,175,55,0.3);
+        }
+
+        #start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(212,175,55,0.5);
+        }
+
+        .voice-select {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .voice-select label {
+            color: var(--text-white);
+            opacity: 0.7;
+        }
+
+        #voice-selector {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--gold);
+            color: var(--text-white);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Particle Effects */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Cinematic Bars */
+        .cinema-bars {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #000;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .cinema-bars.top { top: 0; }
+        .cinema-bars.bottom { bottom: 70px; }
+
+        /* Scene Transitions */
+        .transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 400;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.8s;
+        }
+
+        .transition-overlay.active {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #controls {
+                padding: 0 15px;
+                gap: 10px;
+            }
+
+            .control-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            #volume-slider {
+                width: 50px;
+            }
+
+            .cinema-bars {
+                height: 30px;
+            }
+
+            .character-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .character-card {
+                width: 90%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <h1>天動説と地動説</h1>
+        <p>― 非常識は、いつか常識になる ―</p>
+        <button id="start-btn">▶ 再生開始</button>
+        <div class="voice-select">
+            <label>ナレーション音声を選択</label>
+            <select id="voice-selector">
+                <option value="">読み込み中...</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Transition Overlay -->
+    <div class="transition-overlay" id="transition"></div>
+
+    <!-- Cinema Container -->
+    <div id="cinema">
+        <!-- Cinematic Bars -->
+        <div class="cinema-bars top"></div>
+        <div class="cinema-bars bottom"></div>
+
+        <!-- Scene 0: Opening -->
+        <div class="scene active" id="scene-0">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80')"></div>
+            <div class="particles" id="particles-0"></div>
+            <div class="scene-content">
+                <h1 class="scene-title">天動説と地動説</h1>
+                <p class="scene-subtitle">非常識は、いつか常識になる</p>
+            </div>
+        </div>
+
+        <!-- Scene 1: Introduction -->
+        <div class="scene" id="scene-1">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">はじめに</h2>
+                <p class="scene-subtitle">
+                    突然ですが、あなたは「チ。」という漫画を知っていますか？<br><br>
+                    「チ。」は弾圧されながらも地動説を信じて<br>
+                    証明しようとした人たちの物語です。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 2: Geocentric Model -->
+        <div class="scene" id="scene-2">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">天動説とは</h2>
+                <p class="scene-subtitle">
+                    地球を中心に、太陽や星々が回っているという考え。<br><br>
+                    目で感じたものを信じると、この説に行き着きました。<br>
+                    そして長い間、権力や宗教によって<br>
+                    「正しい」とされてきたのです。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 3: Why people believed -->
+        <div class="scene" id="scene-3">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">なぜ信じられたのか</h2>
+                <p class="scene-subtitle">
+                    地面は動いているように感じない。<br>
+                    太陽は毎日、東から昇り西に沈む。<br>
+                    星は毎晩、規則正しく動いている。<br><br>
+                    見たままを信じれば、天動説は自然な結論でした。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 4: Heliocentric Model Introduction -->
+        <div class="scene" id="scene-4">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1614642264762-d0a3b8bf3700?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">地動説の登場</h2>
+                <p class="scene-subtitle">
+                    「実は地球が動いているのではないか」<br><br>
+                    そう考えた人たちが現れました。<br>
+                    これが地動説です。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 5: Heliocentric Evidence -->
+        <div class="scene" id="scene-5">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">論理的な根拠</h2>
+                <p class="scene-subtitle">
+                    地球が自転すれば、昼と夜が説明できる。<br>
+                    地球が公転すれば、季節の変化も説明できる。<br><br>
+                    しかしこの考えは当時、<br>
+                    <span class="danger-text">とんでもない非常識</span>でした。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 6: Scientists -->
+        <div class="scene" id="scene-6">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">革命を起こした科学者たち</h2>
+                <div class="character-cards">
+                    <div class="character-card">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Nikolaus_Kopernikus.jpg/440px-Nikolaus_Kopernikus.jpg" alt="Copernicus">
+                        <h3>コペルニクス</h3>
+                        <p>1473-1543<br>地動説を体系化した</p>
+                    </div>
+                    <div class="character-card">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Justus_Sustermans_-_Portrait_of_Galileo_Galilei%2C_1636.jpg/440px-Justus_Sustermans_-_Portrait_of_Galileo_Galilei%2C_1636.jpg" alt="Galileo">
+                        <h3>ガリレオ</h3>
+                        <p>1564-1642<br>望遠鏡で証拠を発見</p>
+                    </div>
+                    <div class="character-card">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Johannes_Kepler_1610.jpg/440px-Johannes_Kepler_1610.jpg" alt="Kepler">
+                        <h3>ケプラー</h3>
+                        <p>1571-1630<br>惑星運動の法則を発見</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 7: Proof Timeline -->
+        <div class="scene" id="scene-7">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">証明への道のり</h2>
+                <p class="scene-subtitle">
+                    すぐに「これが証拠だ」とは言えませんでした。<br><br>
+                    観察、発明、理論、法則。<br>
+                    何人もの人が、<br>
+                    数百年をかけて証明したのです。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 8: The Price -->
+        <div class="scene danger" id="scene-8">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1509248961895-b4a7bd06e8c2?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title" style="color: var(--danger-red)">代償</h2>
+                <p class="scene-subtitle">
+                    しかし、真実を語った者たちは<br>
+                    大きな代償を払いました。<br><br>
+                    考えを否定され、危険人物として扱われ、<br>
+                    命を落とした者さえいました。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 9: Bruno -->
+        <div class="scene danger" id="scene-9">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title" style="color: var(--danger-red)">ジョルダーノ・ブルーノ</h2>
+                <p class="scene-subtitle">
+                    1600年、火刑に処されました。<br><br>
+                    「正しいかどうか」ではなく、<br>
+                    「常識に逆らったかどうか」で<br>
+                    裁かれたのです。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 10: Galileo's Trial -->
+        <div class="scene" id="scene-10">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">ガリレオの信念</h2>
+                <p class="scene-quote">
+                    「それでも地球は動く」<br>
+                    <span style="font-size: 0.7em; opacity: 0.7">― ガリレオ・ガリレイ（伝）</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 11: Manga Chi -->
+        <div class="scene" id="scene-11">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">漫画「チ。」</h2>
+                <p class="scene-subtitle">
+                    知ることをあきらめない心。<br>
+                    真実を考える勇気。<br>
+                    世代を超えて受け継がれる思想。<br><br>
+                    この漫画は、そんな人々の<br>
+                    苦しさと情熱を描いています。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 12: Lesson 1 -->
+        <div class="scene" id="scene-12">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1504192010706-dd7f569ee2be?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">学び</h2>
+                <p class="scene-subtitle">
+                    かつて地動説は<br>
+                    非常識で、危険で、間違いだと言われました。<br><br>
+                    今では教科書に載る、<br>
+                    当たり前の知識です。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 13: Lesson 2 -->
+        <div class="scene" id="scene-13">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=1920&q=80')"></div>
+            <div class="scene-content">
+                <p class="scene-quote">
+                    今の常識が、本当に正しいとは限らない。<br><br>
+                    今の非常識が、<br>
+                    未来の常識になることもある。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 14: Final Message -->
+        <div class="scene" id="scene-14">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1464802686167-b939a6910659?w=1920&q=80')"></div>
+            <div class="particles" id="particles-14"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">自分で考え、疑問を持つこと</h2>
+                <p class="scene-subtitle">
+                    自分の目で見て、<br>
+                    自分の頭で考える。<br><br>
+                    それが大切なのです。
+                </p>
+            </div>
+        </div>
+
+        <!-- Scene 15: Ending -->
+        <div class="scene" id="scene-15">
+            <div class="scene-bg" style="background-image: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80')"></div>
+            <div class="particles" id="particles-15"></div>
+            <div class="scene-content">
+                <h2 class="scene-title">ご清聴ありがとうございました</h2>
+                <p class="scene-subtitle" style="margin-top: 40px;">
+                    <span style="color: var(--gold);">「それでも地球は動く」</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subtitle -->
+    <div id="subtitle-container">
+        <div id="subtitle"></div>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls">
+        <button class="control-btn" id="play-btn">▶</button>
+        <button class="control-btn" id="prev-btn">⏮</button>
+        <button class="control-btn" id="next-btn">⏭</button>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <span id="time-display">00:00 / 00:00</span>
+        <span id="scene-indicator">1 / 16</span>
+        <div class="volume-control">
+            <button class="control-btn" id="mute-btn">🔊</button>
+            <input type="range" id="volume-slider" min="0" max="100" value="80">
+        </div>
+    </div>
+
+    <script>
+        // Narration Script Data
+        const scenes = [
+            {
+                id: 0,
+                duration: 6000,
+                narration: "天動説と地動説。非常識は、いつか常識になる。"
+            },
+            {
+                id: 1,
+                duration: 10000,
+                narration: "突然ですが、あなたは「チ。」という漫画を知っていますか？チ。は弾圧されながらも地動説を信じて、証明しようとした人たちの物語です。"
+            },
+            {
+                id: 2,
+                duration: 12000,
+                narration: "天動説とは、地球を中心に太陽や星々が回っているという考えです。目で感じたものを信じると、この説に行き着きました。そして長い間、権力や宗教によって正しいとされてきたのです。"
+            },
+            {
+                id: 3,
+                duration: 12000,
+                narration: "なぜ天動説が信じられたのか。地面は動いているように感じない。太陽は毎日東から昇り西に沈む。星は毎晩規則正しく動いている。見たままを信じれば、天動説は自然な結論でした。"
+            },
+            {
+                id: 4,
+                duration: 8000,
+                narration: "実は地球が動いているのではないか。そう考えた人たちが現れました。これが地動説です。"
+            },
+            {
+                id: 5,
+                duration: 12000,
+                narration: "地球が自転すれば昼と夜が説明できる。地球が公転すれば季節の変化も説明できる。しかしこの考えは当時、とんでもない非常識でした。"
+            },
+            {
+                id: 6,
+                duration: 12000,
+                narration: "革命を起こした科学者たち。コペルニクスは地動説を体系化し、ガリレオは望遠鏡で証拠を発見し、ケプラーは惑星運動の法則を発見しました。"
+            },
+            {
+                id: 7,
+                duration: 10000,
+                narration: "すぐに「これが証拠だ」とは言えませんでした。観察、発明、理論、法則。何人もの人が、数百年をかけて証明したのです。"
+            },
+            {
+                id: 8,
+                duration: 10000,
+                narration: "しかし、真実を語った者たちは大きな代償を払いました。考えを否定され、危険人物として扱われ、命を落とした者さえいました。"
+            },
+            {
+                id: 9,
+                duration: 10000,
+                narration: "ジョルダーノ・ブルーノは1600年、火刑に処されました。正しいかどうかではなく、常識に逆らったかどうかで裁かれたのです。"
+            },
+            {
+                id: 10,
+                duration: 8000,
+                narration: "それでも地球は動く。ガリレオは自身の信念を死ぬ寸前まで証明しようとしました。"
+            },
+            {
+                id: 11,
+                duration: 10000,
+                narration: "漫画「チ。」は、知ることをあきらめない心、真実を考える勇気、世代を超えて受け継がれる思想。そんな人々の苦しさと情熱を描いています。"
+            },
+            {
+                id: 12,
+                duration: 10000,
+                narration: "かつて地動説は、非常識で危険で間違いだと言われました。今では教科書に載る、当たり前の知識です。"
+            },
+            {
+                id: 13,
+                duration: 10000,
+                narration: "今の常識が、本当に正しいとは限らない。今の非常識が、未来の常識になることもある。"
+            },
+            {
+                id: 14,
+                duration: 8000,
+                narration: "自分の目で見て、自分の頭で考える。それが大切なのです。"
+            },
+            {
+                id: 15,
+                duration: 8000,
+                narration: "ご清聴ありがとうございました。それでも地球は動く。"
+            }
+        ];
+
+        // State
+        let currentScene = 0;
+        let isPlaying = false;
+        let sceneTimer = null;
+        let elapsedTime = 0;
+        let totalDuration = scenes.reduce((sum, s) => sum + s.duration, 0);
+        let speechSynth = window.speechSynthesis;
+        let selectedVoice = null;
+        let isMuted = false;
+        let volume = 0.8;
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const voiceSelector = document.getElementById('voice-selector');
+        const playBtn = document.getElementById('play-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const timeDisplay = document.getElementById('time-display');
+        const sceneIndicator = document.getElementById('scene-indicator');
+        const subtitleEl = document.getElementById('subtitle');
+        const muteBtn = document.getElementById('mute-btn');
+        const volumeSlider = document.getElementById('volume-slider');
+        const transitionEl = document.getElementById('transition');
+
+        // Initialize voices
+        function loadVoices() {
+            const voices = speechSynth.getVoices();
+            const japaneseVoices = voices.filter(v => v.lang.includes('ja'));
+
+            voiceSelector.innerHTML = '';
+
+            if (japaneseVoices.length === 0) {
+                voiceSelector.innerHTML = '<option value="">日本語音声が見つかりません</option>';
+                return;
+            }
+
+            japaneseVoices.forEach((voice, i) => {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelector.appendChild(option);
+            });
+
+            selectedVoice = japaneseVoices[0];
+        }
+
+        speechSynth.onvoiceschanged = loadVoices;
+        loadVoices();
+
+        voiceSelector.addEventListener('change', () => {
+            const voices = speechSynth.getVoices().filter(v => v.lang.includes('ja'));
+            selectedVoice = voices[voiceSelector.value] || voices[0];
+        });
+
+        // Create particles
+        function createParticles(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles('particles-0');
+        createParticles('particles-14');
+        createParticles('particles-15');
+
+        // Format time
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Update UI
+        function updateUI() {
+            const currentElapsed = scenes.slice(0, currentScene).reduce((sum, s) => sum + s.duration, 0);
+            progressBar.style.width = (currentElapsed / totalDuration * 100) + '%';
+            timeDisplay.textContent = `${formatTime(currentElapsed)} / ${formatTime(totalDuration)}`;
+            sceneIndicator.textContent = `${currentScene + 1} / ${scenes.length}`;
+            playBtn.textContent = isPlaying ? '⏸' : '▶';
+        }
+
+        // Speak narration
+        function speak(text) {
+            speechSynth.cancel();
+
+            if (isMuted || !text) return;
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = selectedVoice;
+            utterance.lang = 'ja-JP';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = volume;
+
+            speechSynth.speak(utterance);
+        }
+
+        // Show subtitle
+        function showSubtitle(text) {
+            subtitleEl.textContent = text;
+            subtitleEl.classList.add('show');
+        }
+
+        function hideSubtitle() {
+            subtitleEl.classList.remove('show');
+        }
+
+        // Go to scene
+        function goToScene(index, withTransition = true) {
+            if (index < 0 || index >= scenes.length) return;
+
+            clearTimeout(sceneTimer);
+            speechSynth.cancel();
+
+            const doTransition = () => {
+                // Hide all scenes
+                document.querySelectorAll('.scene').forEach(s => {
+                    s.classList.remove('active');
+                });
+
+                // Show target scene
+                currentScene = index;
+                const targetScene = document.getElementById(`scene-${index}`);
+                if (targetScene) {
+                    targetScene.classList.add('active');
+                }
+
+                updateUI();
+
+                // Narration and subtitle
+                const scene = scenes[index];
+                showSubtitle(scene.narration);
+                speak(scene.narration);
+
+                // Auto advance if playing
+                if (isPlaying && currentScene < scenes.length - 1) {
+                    sceneTimer = setTimeout(() => {
+                        goToScene(currentScene + 1);
+                    }, scene.duration);
+                } else if (currentScene === scenes.length - 1) {
+                    // End of video
+                    setTimeout(() => {
+                        isPlaying = false;
+                        updateUI();
+                    }, scene.duration);
+                }
+
+                // Remove transition
+                if (withTransition) {
+                    setTimeout(() => {
+                        transitionEl.classList.remove('active');
+                    }, 300);
+                }
+            };
+
+            if (withTransition && isPlaying) {
+                transitionEl.classList.add('active');
+                setTimeout(doTransition, 500);
+            } else {
+                doTransition();
+            }
+        }
+
+        // Play/Pause
+        function togglePlay() {
+            isPlaying = !isPlaying;
+
+            if (isPlaying) {
+                goToScene(currentScene, false);
+            } else {
+                clearTimeout(sceneTimer);
+                speechSynth.cancel();
+            }
+
+            updateUI();
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            isPlaying = true;
+            goToScene(0, false);
+        });
+
+        playBtn.addEventListener('click', togglePlay);
+
+        prevBtn.addEventListener('click', () => {
+            goToScene(currentScene - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            goToScene(currentScene + 1);
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            let targetTime = percent * totalDuration;
+            let accumulated = 0;
+
+            for (let i = 0; i < scenes.length; i++) {
+                accumulated += scenes[i].duration;
+                if (accumulated >= targetTime) {
+                    goToScene(i);
+                    break;
+                }
+            }
+        });
+
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            muteBtn.textContent = isMuted ? '🔇' : '🔊';
+            if (isMuted) {
+                speechSynth.cancel();
+            }
+        });
+
+        volumeSlider.addEventListener('input', () => {
+            volume = volumeSlider.value / 100;
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (startScreen.classList.contains('hidden')) {
+                switch(e.code) {
+                    case 'Space':
+                        e.preventDefault();
+                        togglePlay();
+                        break;
+                    case 'ArrowLeft':
+                        goToScene(currentScene - 1);
+                        break;
+                    case 'ArrowRight':
+                        goToScene(currentScene + 1);
+                        break;
+                    case 'KeyM':
+                        muteBtn.click();
+                        break;
+                }
+            } else if (e.code === 'Space' || e.code === 'Enter') {
+                startBtn.click();
+            }
+        });
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+</html>
