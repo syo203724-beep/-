@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天動説と地動説 - 非常識は、いつか常識になる</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--gold:#d4af37;--gold-light:#f4d03f;--deep-space:#0a0a1a;--star-white:#e8eaf6;--danger-red:#c62828}
+        html{scroll-behavior:smooth}
+        body{font-family:'Noto Sans JP',sans-serif;background:var(--deep-space);color:var(--star-white);overflow-x:hidden;line-height:1.8}
+        
+        /* Animated Space Background */
+        .space-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-10;background:radial-gradient(ellipse at bottom,#1B2838 0%,#0a0a1a 100%)}
+        
+        /* Animated Stars Layer 1 */
+        .stars-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-9;overflow:hidden}
+        .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--duration) ease-in-out infinite}
+        @keyframes twinkle{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+        
+        /* Floating Particles */
+        .particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-8;overflow:hidden}
+        .particle{position:absolute;border-radius:50%;animation:float linear infinite}
+        @keyframes float{0%{transform:translateY(100vh) rotate(0deg);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100vh) rotate(720deg);opacity:0}}
+        
+        /* Nebula Animation */
+        .nebula{position:fixed;top:0;left:0;width:200%;height:200%;z-index:-7}
+        .nebula-layer{position:absolute;width:100%;height:100%;animation:nebulaMove 60s ease-in-out infinite alternate}
+        .nebula-1{background:radial-gradient(ellipse at 20% 30%,rgba(138,43,226,0.2) 0%,transparent 50%);animation-delay:0s}
+        .nebula-2{background:radial-gradient(ellipse at 80% 70%,rgba(30,60,150,0.2) 0%,transparent 50%);animation-delay:-15s}
+        .nebula-3{background:radial-gradient(ellipse at 50% 50%,rgba(212,175,55,0.1) 0%,transparent 40%);animation-delay:-30s}
+        @keyframes nebulaMove{0%{transform:translate(0,0) scale(1) rotate(0deg)}50%{transform:translate(-5%,-5%) scale(1.1) rotate(5deg)}100%{transform:translate(-10%,-10%) scale(1) rotate(0deg)}}
+        
+        /* Aurora Effect */
+        .aurora{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-6;opacity:0.4}
+        .aurora-wave{position:absolute;width:200%;height:300px;top:10%;left:-50%;background:linear-gradient(90deg,transparent,rgba(0,255,128,0.1),rgba(0,200,255,0.1),rgba(138,43,226,0.1),transparent);animation:auroraWave 20s ease-in-out infinite;filter:blur(60px)}
+        .aurora-wave:nth-child(2){top:30%;animation-delay:-7s;opacity:0.6}
+        .aurora-wave:nth-child(3){top:50%;animation-delay:-14s;opacity:0.4}
+        @keyframes auroraWave{0%,100%{transform:translateX(-20%) skewY(-5deg)}50%{transform:translateX(20%) skewY(5deg)}}
+        
+        /* Shooting Stars */
+        .shooting-stars{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-5;overflow:hidden}
+        .shooting-star{position:absolute;width:150px;height:2px;background:linear-gradient(to right,transparent,rgba(255,255,255,0.8),white,transparent);opacity:0;transform:rotate(-45deg)}
+        .shooting-star::before{content:'';position:absolute;right:0;top:-2px;width:6px;height:6px;background:white;border-radius:50%;box-shadow:0 0 10px white,0 0 20px white}
+        @keyframes shoot{0%{transform:translate(0,0) rotate(-45deg);opacity:0}5%{opacity:1}30%{transform:translate(600px,600px) rotate(-45deg);opacity:0}100%{opacity:0}}
+        .shooting-star:nth-child(1){top:5%;left:30%;animation:shoot 8s ease-out infinite 1s}
+        .shooting-star:nth-child(2){top:15%;left:60%;animation:shoot 8s ease-out infinite 4s}
+        .shooting-star:nth-child(3){top:35%;left:20%;animation:shoot 8s ease-out infinite 7s}
+        .shooting-star:nth-child(4){top:25%;left:80%;animation:shoot 8s ease-out infinite 10s}
+        .shooting-star:nth-child(5){top:45%;left:50%;animation:shoot 8s ease-out infinite 13s}
+        
+        /* Planet Orbit Animation */
+        .orbit-container{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:-4;width:800px;height:800px;opacity:0.15}
+        .orbit{position:absolute;border:1px solid rgba(212,175,55,0.3);border-radius:50%;animation:orbitRotate linear infinite}
+        .orbit-1{width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);animation-duration:30s}
+        .orbit-2{width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);animation-duration:50s}
+        .orbit-3{width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);animation-duration:70s}
+        .orbit-planet{position:absolute;width:8px;height:8px;background:var(--gold);border-radius:50%;top:-4px;left:50%;transform:translateX(-50%);box-shadow:0 0 10px var(--gold)}
+        @keyframes orbitRotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+        
+        /* Loading Screen */
+        #loading{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#000,#0a0a1a);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity 1s,visibility 1s}
+        #loading.hidden{opacity:0;visibility:hidden}
+        #loading-text{font-family:'Orbitron',monospace;font-size:clamp(1rem,4vw,2rem);color:var(--gold);letter-spacing:0.3em;text-shadow:0 0 30px var(--gold);margin-bottom:30px}
+        .progress-bar{width:280px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));width:0%;box-shadow:0 0 20px var(--gold)}
+        .mission-complete{font-family:'Cinzel',serif;font-size:clamp(1.5rem,5vw,3rem);color:var(--gold);text-shadow:0 0 40px var(--gold);animation:pulseIn 1s ease-out}
+        @keyframes pulseIn{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+        
+        /* Navigation */
+        nav{position:fixed;top:0;left:0;right:0;padding:18px 35px;display:flex;justify-content:space-between;align-items:center;z-index:1000;background:linear-gradient(to bottom,rgba(0,0,0,0.95),transparent);transition:all 0.3s}
+        nav.scrolled{background:rgba(10,10,26,0.98);backdrop-filter:blur(15px);padding:12px 35px}
+        .logo{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold);font-weight:700;text-decoration:none;display:flex;align-items:center;gap:10px}
+        .logo-icon{width:28px;height:28px}
+        .nav-links{display:flex;gap:28px;list-style:none}
+        .nav-links a{color:var(--star-white);text-decoration:none;font-size:0.9rem;letter-spacing:0.08em;transition:all 0.3s;padding:8px 0;position:relative}
+        .nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--gold);transition:width 0.3s}
+        .nav-links a:hover,.nav-links a.active{color:var(--gold)}
+        .nav-links a:hover::after,.nav-links a.active::after{width:100%}
+        .menu-btn{display:none;flex-direction:column;gap:6px;cursor:pointer;padding:5px}
+        .menu-btn span{width:28px;height:2px;background:var(--gold);transition:0.3s}
+        
+        /* Sections */
+        section{min-height:100vh;padding:120px 25px;position:relative;display:flex;align-items:center;justify-content:center}
+        .section-content{max-width:1100px;width:100%;opacity:0;transform:translateY(60px);transition:all 1.2s cubic-bezier(0.4,0,0.2,1)}
+        .section-content.visible{opacity:1;transform:translateY(0)}
+        .section-num{font-family:'Orbitron',monospace;font-size:clamp(4rem,12vw,8rem);font-weight:900;-webkit-text-stroke:2px var(--gold);color:transparent;opacity:0.12;position:absolute;top:80px;left:30px;z-index:-1}
+        .section-title{font-family:'Cinzel',serif;font-size:clamp(2rem,5vw,3.2rem);color:var(--gold);margin-bottom:35px;position:relative;display:inline-block}
+        .section-title::after{content:'';position:absolute;bottom:-12px;left:0;width:80px;height:3px;background:linear-gradient(to right,var(--gold),transparent)}
+        .text-block{font-size:clamp(1.05rem,2vw,1.2rem);line-height:2.1;margin-bottom:28px;color:rgba(232,234,246,0.92)}
+        .highlight{color:var(--gold);font-weight:600}
+        .highlight-red{color:var(--danger-red);font-weight:600}
+        
+        /* Hero Section */
+        #hero{text-align:center}
+        #hero h1{font-family:'Cinzel',serif;font-size:clamp(2.8rem,11vw,7rem);font-weight:900;background:linear-gradient(135deg,var(--gold),#fff8dc,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:25px;filter:drop-shadow(0 0 40px rgba(212,175,55,0.5));animation:titleGlow 3s ease-in-out infinite alternate}
+        @keyframes titleGlow{from{filter:drop-shadow(0 0 40px rgba(212,175,55,0.5))}to{filter:drop-shadow(0 0 60px rgba(212,175,55,0.8))}}
+        #hero .subtitle{font-family:'Cinzel',serif;font-size:clamp(1rem,3vw,1.6rem);color:var(--star-white);letter-spacing:0.5em;opacity:0.9}
+        .scroll-hint{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);text-align:center;cursor:pointer;animation:bounce 2s infinite}
+        @keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+        .scroll-hint span{display:block;font-size:0.8rem;color:var(--gold);letter-spacing:0.25em;margin-bottom:12px}
+        .scroll-arrow{width:26px;height:44px;border:2px solid var(--gold);border-radius:13px;margin:0 auto;position:relative}
+        .scroll-arrow::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:5px;height:5px;background:var(--gold);border-radius:50%;animation:scrollDot 2s infinite}
+        @keyframes scrollDot{0%,100%{top:10px;opacity:1}50%{top:28px;opacity:0.3}}
+        
+        /* Cards */
+        .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;margin-top:45px}
+        .card{background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));border:1px solid rgba(212,175,55,0.2);border-radius:20px;overflow:hidden;transition:all 0.5s cubic-bezier(0.4,0,0.2,1)}
+        .card:hover{transform:translateY(-12px) scale(1.02);border-color:var(--gold);box-shadow:0 25px 60px rgba(212,175,55,0.2)}
+        .card-visual{width:100%;height:200px;display:flex;align-items:center;justify-content:center;transition:transform 0.5s;position:relative;overflow:hidden}
+        .card:hover .card-visual{transform:scale(1.05)}
+        .card-visual svg{width:80px;height:80px;filter:drop-shadow(0 0 20px currentColor)}
+        .card-body{padding:28px}
+        .card h3{font-family:'Cinzel',serif;font-size:1.25rem;color:var(--gold);margin-bottom:14px}
+        .card p{font-size:1rem;color:rgba(232,234,246,0.85);line-height:1.8}
+        .card.danger{border-color:rgba(198,40,40,0.35);background:linear-gradient(145deg,rgba(198,40,40,0.1),rgba(198,40,40,0.02))}
+        .card.danger:hover{border-color:var(--danger-red);box-shadow:0 25px 60px rgba(198,40,40,0.25)}
+        
+        /* Card Visual Backgrounds */
+        .bg-earth{background:linear-gradient(135deg,#1a472a 0%,#0d2818 100%)}
+        .bg-sunrise{background:linear-gradient(135deg,#ff6b35 0%,#1a1a2e 100%)}
+        .bg-stars{background:linear-gradient(135deg,#1a1a3a 0%,#0a0a1a 100%)}
+        .bg-planet{background:linear-gradient(135deg,#1e3a5f 0%,#0a1628 100%)}
+        .bg-sun{background:linear-gradient(135deg,#ff8c00 0%,#1a1a2e 100%)}
+        .bg-book{background:linear-gradient(135deg,#3d2914 0%,#1a1208 100%)}
+        .bg-fire{background:linear-gradient(135deg,#8b0000 0%,#1a0505 100%)}
+        .bg-eye{background:linear-gradient(135deg,#2d3436 0%,#0a0a0a 100%)}
+        .bg-chain{background:linear-gradient(135deg,#4a4a4a 0%,#1a1a1a 100%)}
+        .bg-heart{background:linear-gradient(135deg,#6b1e4a 0%,#1a0a14 100%)}
+        .bg-people{background:linear-gradient(135deg,#34495e 0%,#1a1a2e 100%)}
+        .bg-copernicus{background:linear-gradient(135deg,#4a3728 0%,#1a1408 100%)}
+        .bg-galileo{background:linear-gradient(135deg,#2c3e50 0%,#1a1a2e 100%)}
+        .bg-kepler{background:linear-gradient(135deg,#3d3020 0%,#1a1208 100%)}
+        .bg-trial{background:linear-gradient(135deg,#5c3d2e 0%,#1a0f08 100%)}
+        .bg-bruno{background:linear-gradient(135deg,#8b0000 0%,#1a0505 100%)}
+        
+        /* Gallery */
+        .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:28px;margin-top:45px}
+        .gallery-item{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/3;border:1px solid rgba(212,175,55,0.2);transition:all 0.5s}
+        .gallery-item:hover{transform:scale(1.03);border-color:var(--gold);box-shadow:0 20px 50px rgba(0,0,0,0.5)}
+        .gallery-visual{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:transform 0.5s}
+        .gallery-visual svg{width:80px;height:80px;filter:drop-shadow(0 0 20px currentColor)}
+        .gallery-item:hover .gallery-visual{transform:scale(1.1)}
+        .gallery-caption{position:absolute;bottom:0;left:0;right:0;padding:70px 22px 22px;background:linear-gradient(to top,rgba(0,0,0,0.95),transparent)}
+        .gallery-caption h4{font-family:'Cinzel',serif;color:var(--gold);font-size:1.15rem;margin-bottom:6px}
+        .gallery-caption p{font-size:0.9rem;color:rgba(255,255,255,0.75)}
+        
+        /* Timeline */
+        .timeline{position:relative;padding-left:55px;margin-top:45px}
+        .timeline::before{content:'';position:absolute;left:18px;top:0;bottom:0;width:3px;background:linear-gradient(to bottom,var(--gold),#8b5cf6,#3b82f6);border-radius:2px}
+        .timeline-item{position:relative;margin-bottom:45px;padding:28px;background:linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));border-radius:16px;border:1px solid rgba(212,175,55,0.15);transition:all 0.4s}
+        .timeline-item:hover{border-color:var(--gold);transform:translateX(8px);box-shadow:0 10px 40px rgba(212,175,55,0.1)}
+        .timeline-item::before{content:'';position:absolute;left:-45px;top:32px;width:16px;height:16px;background:var(--gold);border-radius:50%;box-shadow:0 0 20px var(--gold)}
+        .timeline-item h3{font-family:'Cinzel',serif;font-size:1.25rem;color:var(--gold);margin-bottom:14px}
+        .timeline-item p{font-size:1.05rem;color:rgba(232,234,246,0.88);line-height:1.9}
+        
+        /* Quote Box */
+        .quote-box{text-align:center;padding:55px 35px;margin:55px 0;border-left:4px solid var(--gold);border-right:4px solid var(--gold);background:linear-gradient(145deg,rgba(212,175,55,0.06),rgba(212,175,55,0.02));border-radius:8px}
+        .quote-box blockquote{font-family:'Cinzel',serif;font-size:clamp(1.15rem,2.8vw,1.6rem);font-style:italic;color:var(--star-white);line-height:2}
+        
+        /* Final Section */
+        .final-box{text-align:center;max-width:850px;margin:0 auto}
+        .big-message{font-family:'Cinzel',serif;font-size:clamp(2rem,6vw,3.5rem);background:linear-gradient(135deg,var(--gold),#fff8dc,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:45px 0;line-height:1.5}
+        
+        /* Icon Animations */
+        .icon-pulse{animation:iconPulse 2s ease-in-out infinite}
+        @keyframes iconPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:0.8}}
+        .icon-rotate{animation:iconRotate 20s linear infinite}
+        @keyframes iconRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        .icon-float{animation:iconFloat 3s ease-in-out infinite}
+        @keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .icon-flicker{animation:iconFlicker 0.5s ease-in-out infinite}
+        @keyframes iconFlicker{0%,100%{opacity:1}50%{opacity:0.7}}
+        
+        /* Footer */
+        footer{padding:35px 25px;text-align:center;border-top:1px solid rgba(212,175,55,0.25);background:rgba(0,0,0,0.6)}
+        footer p{font-size:0.9rem;color:rgba(232,234,246,0.55)}
+        
+        /* Responsive */
+        @media(max-width:768px){
+            .nav-links{position:fixed;top:0;right:-100%;width:80%;height:100vh;background:rgba(10,10,26,0.98);flex-direction:column;justify-content:center;align-items:center;gap:35px;transition:right 0.4s}
+            .nav-links.open{right:0}
+            .menu-btn{display:flex}
+            .section-num{font-size:5rem;top:70px;left:15px}
+            section{padding:90px 18px}
+            .timeline{padding-left:40px}
+            .timeline::before{left:10px}
+            .timeline-item::before{left:-38px}
+            .card-grid,.gallery{grid-template-columns:1fr}
+            .orbit-container{width:400px;height:400px}
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div id="loading-text">01001000 01000101 01001100</div>
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    </div>
+    
+    <!-- Animated Background Elements -->
+    <div class="space-bg"></div>
+    <div class="stars-container" id="starsContainer"></div>
+    <div class="particles" id="particlesContainer"></div>
+    <div class="nebula">
+        <div class="nebula-layer nebula-1"></div>
+        <div class="nebula-layer nebula-2"></div>
+        <div class="nebula-layer nebula-3"></div>
+    </div>
+    <div class="aurora">
+        <div class="aurora-wave"></div>
+        <div class="aurora-wave"></div>
+        <div class="aurora-wave"></div>
+    </div>
+    <div class="shooting-stars">
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+    </div>
+    <div class="orbit-container">
+        <div class="orbit orbit-1"><div class="orbit-planet"></div></div>
+        <div class="orbit orbit-2"><div class="orbit-planet"></div></div>
+        <div class="orbit orbit-3"><div class="orbit-planet"></div></div>
+    </div>
+    
+    <nav id="nav">
+        <a href="#hero" class="logo">
+            <svg class="logo-icon" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="20" fill="#1a472a" stroke="#d4af37" stroke-width="2"/>
+                <ellipse cx="50" cy="50" rx="35" ry="12" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="4 2" transform="rotate(-20 50 50)"/>
+                <ellipse cx="50" cy="50" rx="45" ry="16" stroke="#d4af37" stroke-width="1" stroke-dasharray="2 2" transform="rotate(10 50 50)"/>
+                <circle cx="50" cy="50" r="5" fill="#3498db"/>
+            </svg>
+            HELIOCENTRIC
+        </a>
+        <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#hero">序章</a></li>
+            <li><a href="#section1">天動説</a></li>
+            <li><a href="#section2">地動説</a></li>
+            <li><a href="#section3">証明</a></li>
+            <li><a href="#section4">代償</a></li>
+            <li><a href="#section5">漫画</a></li>
+            <li><a href="#section6">学び</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section id="hero">
+            <div class="section-content visible">
+                <h1>天動説と地動説</h1>
+                <p class="subtitle">― 非常識は、いつか常識になる ―</p>
+            </div>
+            <div class="scroll-hint" onclick="document.getElementById('section1').scrollIntoView({behavior:'smooth'})">
+                <span>SCROLL</span>
+                <div class="scroll-arrow"></div>
+            </div>
+        </section>
+        
+        <section id="section1">
+            <span class="section-num">01</span>
+            <div class="section-content">
+                <h2 class="section-title">天動説 ― 昔の「当たり前」</h2>
+                <p class="text-block">昔の人たちは、<span class="highlight">「地球は動かず、太陽や星が地球のまわりを回っている」</span>と考えていました。これを<span class="highlight">天動説</span>といいます。</p>
+                <p class="text-block">理由はとてもシンプルでした。目で見たままを信じると、天動説のほうが自然だったのです。</p>
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="card-visual bg-earth">
+                            <svg viewBox="0 0 100 100" fill="none" class="icon-pulse">
+                                <circle cx="50" cy="50" r="35" fill="#1a472a"/>
+                                <path d="M25 50 Q35 30 50 35 Q65 40 55 55 Q45 70 30 60 Q20 55 25 50" fill="#2d5a3d"/>
+                                <path d="M60 30 Q75 35 70 50 Q65 60 55 55" fill="#2d5a3d"/>
+                                <circle cx="50" cy="50" r="35" stroke="#d4af37" stroke-width="2"/>
+                                <ellipse cx="50" cy="50" rx="40" ry="8" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="3 3"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>地面は動かない</h3>
+                            <p>私たちが立っている地面は、動いているように感じません。だから地球は静止していると考えました。</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-visual bg-sunrise">
+                            <svg viewBox="0 0 100 100" fill="none" class="icon-float">
+                                <defs>
+                                    <linearGradient id="sunriseGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#ff6b35"/>
+                                        <stop offset="100%" style="stop-color:#ffd700"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect x="10" y="60" width="80" height="30" fill="#1a1a2e"/>
+                                <circle cx="50" cy="60" r="25" fill="url(#sunriseGrad)"/>
+                                <line x1="50" y1="25" x2="50" y2="15" stroke="#ffd700" stroke-width="2"/>
+                                <line x1="75" y1="50" x2="85" y2="45" stroke="#ffd700" stroke-width="2"/>
+                                <line x1="25" y1="50" x2="15" y2="45" stroke="#ffd700" stroke-width="2"/>
+                                <line x1="70" y1="35" x2="78" y2="28" stroke="#ffd700" stroke-width="2"/>
+                                <line x1="30" y1="35" x2="22" y2="28" stroke="#ffd700" stroke-width="2"/>
+                                <path d="M10 60 Q30 55 50 58 Q70 55 90 60" stroke="#d4af37" stroke-width="1"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>太陽の動き</h3>
+                            <p>太陽は毎日、東から昇って西に沈みます。まるで地球のまわりを回っているように見えました。</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-visual bg-stars">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <circle cx="50" cy="50" r="40" stroke="rgba(212,175,55,0.3)" stroke-width="1" stroke-dasharray="2 4"/>
+                                <circle cx="50" cy="50" r="30" stroke="rgba(212,175,55,0.2)" stroke-width="1"/>
+                                <polygon points="50,15 52,22 60,22 54,27 56,35 50,30 44,35 46,27 40,22 48,22" fill="#ffd700" class="icon-pulse"/>
+                                <polygon points="25,40 26,43 30,43 27,46 28,50 25,47 22,50 23,46 20,43 24,43" fill="#fff"/>
+                                <polygon points="75,55 76,58 80,58 77,61 78,65 75,62 72,65 73,61 70,58 74,58" fill="#fff"/>
+                                <polygon points="35,70 36,73 40,73 37,76 38,80 35,77 32,80 33,76 30,73 34,73" fill="#ffd700"/>
+                                <polygon points="70,30 71,33 75,33 72,36 73,40 70,37 67,40 68,36 65,33 69,33" fill="#fff"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>星の規則性</h3>
+                            <p>星は毎日同じように動いています。天球が地球の周りを回転していると考えれば、完璧に説明できました。</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-block" style="margin-top:45px">さらにこの考えは、長いあいだ宗教や権力によって<span class="highlight-red">「正しい考え」</span>とされていました。</p>
+            </div>
+        </section>
+        
+        <section id="section2">
+            <span class="section-num">02</span>
+            <div class="section-content">
+                <h2 class="section-title">地動説 ―「おかしい」と思った人たち</h2>
+                <p class="text-block">一方で、<span class="highlight">「実は地球が動いているのではないか」</span>と考えた人たちが現れます。これが<span class="highlight">地動説</span>です。</p>
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="card-visual bg-planet">
+                            <svg viewBox="0 0 100 100" fill="none" class="icon-rotate">
+                                <circle cx="50" cy="50" r="25" fill="#1e3a5f"/>
+                                <path d="M30 50 Q40 35 50 40 Q60 45 50 55 Q40 65 35 55 Q30 50 30 50" fill="#2d5a8f"/>
+                                <circle cx="50" cy="50" r="25" stroke="#3498db" stroke-width="2"/>
+                                <line x1="50" y1="20" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="2 2"/>
+                                <circle cx="50" cy="20" r="3" fill="#d4af37"/>
+                                <circle cx="50" cy="80" r="3" fill="#d4af37"/>
+                                <path d="M20 50 A30 30 0 0 1 80 50" stroke="rgba(212,175,55,0.5)" stroke-width="1" fill="none" stroke-dasharray="4 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>地球の自転</h3>
+                            <p>地球が自分で回っている（自転）と考えると、昼と夜の移り変わりがシンプルに説明できます。</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-visual bg-sun">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <defs>
+                                    <radialGradient id="sunGrad" cx="50%" cy="50%">
+                                        <stop offset="0%" style="stop-color:#fff"/>
+                                        <stop offset="30%" style="stop-color:#ffd700"/>
+                                        <stop offset="100%" style="stop-color:#ff8c00"/>
+                                    </radialGradient>
+                                </defs>
+                                <circle cx="50" cy="50" r="20" fill="url(#sunGrad)" class="icon-pulse"/>
+                                <ellipse cx="50" cy="50" rx="35" ry="35" stroke="rgba(212,175,55,0.3)" stroke-width="1" stroke-dasharray="4 4" fill="none"/>
+                                <circle cx="85" cy="50" r="6" fill="#3498db"/>
+                                <circle cx="85" cy="50" r="6" stroke="#d4af37" stroke-width="1"/>
+                                <path d="M50 50 L85 50" stroke="rgba(212,175,55,0.3)" stroke-width="1" stroke-dasharray="2 2"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>太陽を中心に</h3>
+                            <p>地球が太陽のまわりを回っている（公転）と考えると、季節の変化や惑星の動きも説明できます。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="quote-box">
+                    <blockquote>しかしこの考えは、当時の「常識」から見ると、<br><span class="highlight-red">とんでもない非常識</span>でした。</blockquote>
+                </div>
+                <h3 style="font-family:'Cinzel',serif;font-size:1.5rem;color:var(--gold);margin:55px 0 25px;text-align:center">革命を起こした科学者たち</h3>
+                <div class="gallery">
+                    <div class="gallery-item">
+                        <div class="gallery-visual bg-copernicus">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <circle cx="50" cy="35" r="18" fill="#e8c39e"/>
+                                <path d="M32 35 Q32 55 50 60 Q68 55 68 35" fill="#4a3728"/>
+                                <rect x="35" y="55" width="30" height="35" fill="#2c1810"/>
+                                <circle cx="45" cy="32" r="2" fill="#2c1810"/>
+                                <circle cx="55" cy="32" r="2" fill="#2c1810"/>
+                                <path d="M45 40 Q50 44 55 40" stroke="#2c1810" stroke-width="1.5" fill="none"/>
+                                <ellipse cx="50" cy="75" rx="25" ry="8" stroke="#d4af37" stroke-width="1" stroke-dasharray="3 3"/>
+                                <circle cx="50" cy="75" r="4" fill="#ff8c00"/>
+                                <circle cx="75" cy="75" r="2" fill="#3498db"/>
+                            </svg>
+                        </div>
+                        <div class="gallery-caption">
+                            <h4>ニコラウス・コペルニクス</h4>
+                            <p>1473-1543 / 地動説を体系化</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <div class="gallery-visual bg-galileo">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <circle cx="50" cy="35" r="18" fill="#e8c39e"/>
+                                <path d="M35 28 Q50 20 65 28" fill="#5a4a3a"/>
+                                <rect x="35" y="55" width="30" height="35" fill="#2c3e50"/>
+                                <circle cx="45" cy="32" r="2" fill="#2c1810"/>
+                                <circle cx="55" cy="32" r="2" fill="#2c1810"/>
+                                <path d="M40 45 L60 45" stroke="#5a4a3a" stroke-width="2"/>
+                                <rect x="70" y="40" width="25" height="8" rx="4" fill="#8b7355" transform="rotate(-30 70 40)"/>
+                                <circle cx="92" cy="32" r="6" stroke="#d4af37" stroke-width="2" fill="none"/>
+                                <circle cx="92" cy="32" r="3" stroke="#d4af37" stroke-width="1" fill="none"/>
+                            </svg>
+                        </div>
+                        <div class="gallery-caption">
+                            <h4>ガリレオ・ガリレイ</h4>
+                            <p>1564-1642 / 望遠鏡で証拠を発見</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <div class="gallery-visual bg-kepler">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <circle cx="50" cy="35" r="18" fill="#e8c39e"/>
+                                <path d="M32 30 Q50 22 68 30" fill="#3d3020"/>
+                                <rect x="35" y="55" width="30" height="35" fill="#3d3020"/>
+                                <rect x="42" y="28" width="16" height="6" rx="1" fill="rgba(255,255,255,0.3)"/>
+                                <circle cx="45" cy="32" r="2" fill="#2c1810"/>
+                                <circle cx="55" cy="32" r="2" fill="#2c1810"/>
+                                <path d="M45 42 Q50 45 55 42" stroke="#2c1810" stroke-width="1.5" fill="none"/>
+                                <ellipse cx="50" cy="80" rx="30" ry="12" stroke="#d4af37" stroke-width="2" fill="none"/>
+                                <circle cx="50" cy="80" r="3" fill="#ff8c00"/>
+                                <circle cx="20" cy="80" r="2" fill="#3498db"/>
+                            </svg>
+                        </div>
+                        <div class="gallery-caption">
+                            <h4>ヨハネス・ケプラー</h4>
+                            <p>1571-1630 / 惑星運動の法則を発見</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section3">
+            <span class="section-num">03</span>
+            <div class="section-content">
+                <h2 class="section-title">証明 ― 真実はどう証明されたのか</h2>
+                <p class="text-block">すぐに「これが証拠だ！」と言えるものはありませんでした。だからこそ、<span class="highlight">長い時間</span>がかかりました。</p>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h3>① 繰り返しの観察</h3>
+                        <p>惑星の<span class="highlight">逆行運動</span>は天動説では説明が困難でした。</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>② 望遠鏡の発明（1609年）</h3>
+                        <p>ガリレオは<span class="highlight">木星の周りを回る4つの衛星</span>を発見しました。</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>③ ケプラーの法則（1609-1619年）</h3>
+                        <p>惑星は<span class="highlight">楕円軌道</span>を描くことを発見しました。</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>④ 決定的な証拠（1838年）</h3>
+                        <p><span class="highlight">年周視差</span>が観測されました。約300年後のことでした。</p>
+                    </div>
+                </div>
+                <div class="quote-box">
+                    <blockquote>何人もの人が<span class="highlight">長い時間をかけて努力し紡いできた</span></blockquote>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section4">
+            <span class="section-num">04</span>
+            <div class="section-content">
+                <h2 class="section-title">代償 ― 真実を語った者たちの運命</h2>
+                <p class="text-block" style="text-align:center;font-size:1.3rem"><span class="highlight-red">ここがとても大切なところです。</span></p>
+                <div class="card-grid">
+                    <div class="card danger">
+                        <div class="card-visual bg-eye">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <circle cx="50" cy="50" r="35" stroke="#c62828" stroke-width="3"/>
+                                <line x1="25" y1="25" x2="75" y2="75" stroke="#c62828" stroke-width="4"/>
+                                <ellipse cx="50" cy="50" rx="25" ry="15" fill="#2d3436" stroke="#888" stroke-width="2"/>
+                                <circle cx="50" cy="50" r="10" fill="#1a1a1a"/>
+                                <circle cx="50" cy="50" r="5" fill="#333"/>
+                                <circle cx="47" cy="47" r="2" fill="#fff"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>考えを否定された</h3>
+                            <p>宗教的・学術的権威によって完全に否定されました。</p>
+                        </div>
+                    </div>
+                    <div class="card danger">
+                        <div class="card-visual bg-chain">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <ellipse cx="30" cy="40" rx="12" ry="8" stroke="#888" stroke-width="4" fill="none"/>
+                                <ellipse cx="50" cy="50" rx="12" ry="8" stroke="#888" stroke-width="4" fill="none"/>
+                                <ellipse cx="70" cy="60" rx="12" ry="8" stroke="#888" stroke-width="4" fill="none"/>
+                                <circle cx="50" cy="75" r="8" fill="#4a4a4a"/>
+                                <rect x="46" y="60" width="8" height="15" fill="#4a4a4a"/>
+                                <path d="M30 85 L50 75 L70 85" stroke="#666" stroke-width="3" fill="none"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>危険人物として扱われた</h3>
+                            <p>監視や迫害の対象となりました。</p>
+                        </div>
+                    </div>
+                    <div class="card danger">
+                        <div class="card-visual bg-fire">
+                            <svg viewBox="0 0 100 100" fill="none" class="icon-flicker">
+                                <defs>
+                                    <linearGradient id="fireGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#8b0000"/>
+                                        <stop offset="50%" style="stop-color:#ff4500"/>
+                                        <stop offset="100%" style="stop-color:#ffd700"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M50 15 Q65 35 60 50 Q70 45 65 65 Q75 60 70 80 Q60 95 50 95 Q40 95 30 80 Q25 60 35 65 Q30 45 40 50 Q35 35 50 15" fill="url(#fireGrad)"/>
+                                <path d="M50 35 Q58 50 55 65 Q60 60 57 75 Q52 85 50 85 Q48 85 43 75 Q40 60 45 65 Q42 50 50 35" fill="#ffd700"/>
+                                <ellipse cx="50" cy="92" rx="20" ry="5" fill="#1a0505"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>命を落とした人も</h3>
+                            <p>ジョルダーノ・ブルーノは1600年に火刑に処されました。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery" style="margin-top:55px">
+                    <div class="gallery-item">
+                        <div class="gallery-visual bg-trial">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <rect x="30" y="20" width="40" height="60" fill="#5c3d2e"/>
+                                <rect x="35" y="25" width="30" height="50" fill="#3d2914"/>
+                                <circle cx="50" cy="40" r="8" fill="#d4af37"/>
+                                <rect x="48" y="48" width="4" height="20" fill="#d4af37"/>
+                                <path d="M40 68 L50 58 L60 68" stroke="#d4af37" stroke-width="3" fill="none"/>
+                                <rect x="20" y="75" width="60" height="8" fill="#2c1810"/>
+                                <rect x="25" y="70" width="50" height="5" fill="#3d2914"/>
+                            </svg>
+                        </div>
+                        <div class="gallery-caption">
+                            <h4>ガリレオの宗教裁判（1633年）</h4>
+                            <p>「それでも地球は動く」</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <div class="gallery-visual bg-bruno">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <circle cx="50" cy="30" r="15" fill="#e8c39e"/>
+                                <path d="M35 25 Q50 15 65 25" fill="#2c1810"/>
+                                <circle cx="45" cy="28" r="2" fill="#2c1810"/>
+                                <circle cx="55" cy="28" r="2" fill="#2c1810"/>
+                                <path d="M45 35 Q50 38 55 35" stroke="#2c1810" stroke-width="1.5" fill="none"/>
+                                <rect x="40" y="45" width="20" height="40" fill="#3d2914"/>
+                                <path d="M50 55 Q60 65 55 80 Q65 75 60 90 Q55 95 50 95 Q45 95 40 90 Q35 75 45 80 Q40 65 50 55" fill="url(#fireGrad)" class="icon-flicker"/>
+                            </svg>
+                        </div>
+                        <div class="gallery-caption">
+                            <h4>ジョルダーノ・ブルーノ</h4>
+                            <p>1548-1600 / 信念を曲げず火刑に処された</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="quote-box">
+                    <blockquote>「正しいかどうか」よりも、<span class="highlight-red">「常識に逆らったかどうか」</span>で裁かれた</blockquote>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section5">
+            <span class="section-num">05</span>
+            <div class="section-content">
+                <h2 class="section-title">漫画『チ。』― 地球の運動について</h2>
+                <p class="text-block">漫画『チ。―地球の運動について―』（魚豊 作）は、地動説を信じた人たちの<span class="highlight">苦しさと情熱</span>を描いた作品です。</p>
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="card-visual bg-book">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <rect x="20" y="25" width="60" height="55" rx="3" fill="#3d2914"/>
+                                <rect x="25" y="25" width="50" height="55" fill="#f5e6d3"/>
+                                <rect x="48" y="25" width="4" height="55" fill="#2c1810"/>
+                                <line x1="30" y1="35" x2="45" y2="35" stroke="#2c1810" stroke-width="1"/>
+                                <line x1="30" y1="42" x2="43" y2="42" stroke="#2c1810" stroke-width="1"/>
+                                <line x1="30" y1="49" x2="45" y2="49" stroke="#2c1810" stroke-width="1"/>
+                                <line x1="55" y1="35" x2="70" y2="35" stroke="#2c1810" stroke-width="1"/>
+                                <line x1="55" y1="42" x2="68" y2="42" stroke="#2c1810" stroke-width="1"/>
+                                <line x1="55" y1="49" x2="70" y2="49" stroke="#2c1810" stroke-width="1"/>
+                                <circle cx="60" cy="65" r="8" stroke="#d4af37" stroke-width="1" fill="none"/>
+                                <circle cx="60" cy="65" r="3" fill="#ff8c00"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>知ることをあきらめない心</h3>
+                            <p>命を懸けてまで真実を知ろうとする姿</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-visual bg-heart">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <defs>
+                                    <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#d4af37"/>
+                                        <stop offset="100%" style="stop-color:#ffd700"/>
+                                    </linearGradient>
+                                </defs>
+                                <polygon points="50,20 54,35 70,35 57,45 62,60 50,50 38,60 43,45 30,35 46,35" fill="url(#sparkGrad)" class="icon-pulse"/>
+                                <circle cx="50" cy="42" r="20" stroke="rgba(212,175,55,0.5)" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
+                                <circle cx="50" cy="42" r="30" stroke="rgba(212,175,55,0.3)" stroke-width="1" stroke-dasharray="2 4" fill="none"/>
+                                <polygon points="30,75 32,80 38,80 33,84 35,90 30,86 25,90 27,84 22,80 28,80" fill="#fff" opacity="0.8"/>
+                                <polygon points="70,70 71,73 75,73 72,76 73,80 70,77 67,80 68,76 65,73 69,73" fill="#fff" opacity="0.6"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>真実を考える勇気</h3>
+                            <p>正しいと信じることを貫く強さ</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-visual bg-people">
+                            <svg viewBox="0 0 100 100" fill="none">
+                                <circle cx="30" cy="35" r="10" fill="#e8c39e"/>
+                                <rect x="22" y="45" width="16" height="25" rx="3" fill="#34495e"/>
+                                <circle cx="50" cy="30" r="12" fill="#e8c39e"/>
+                                <rect x="40" y="42" width="20" height="30" rx="3" fill="#2c3e50"/>
+                                <circle cx="70" cy="35" r="10" fill="#e8c39e"/>
+                                <rect x="62" y="45" width="16" height="25" rx="3" fill="#34495e"/>
+                                <path d="M30 55 Q40 50 50 55 Q60 50 70 55" stroke="#d4af37" stroke-width="2" fill="none"/>
+                                <path d="M35 80 L50 72 L65 80" stroke="#d4af37" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>
+                            </svg>
+                        </div>
+                        <div class="card-body">
+                            <h3>知の継承</h3>
+                            <p>世代を超えて受け継がれていく思想</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section6">
+            <span class="section-num">06</span>
+            <div class="section-content">
+                <h2 class="section-title">学び ― 地動説から学べること</h2>
+                <div class="final-box">
+                    <div class="card-grid" style="margin-bottom:55px">
+                        <div class="card danger">
+                            <div class="card-body" style="text-align:center;padding:35px">
+                                <svg viewBox="0 0 60 60" width="60" height="60" fill="none" style="margin-bottom:15px">
+                                    <circle cx="30" cy="30" r="25" stroke="#c62828" stroke-width="3"/>
+                                    <line x1="12" y1="12" x2="48" y2="48" stroke="#c62828" stroke-width="4"/>
+                                </svg>
+                                <h3>かつての地動説</h3>
+                                <p style="font-size:1.15rem;margin-top:15px">非常識・危険・間違い<br>だと言われました</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body" style="text-align:center;padding:35px">
+                                <svg viewBox="0 0 60 60" width="60" height="60" fill="none" style="margin-bottom:15px">
+                                    <circle cx="30" cy="30" r="25" stroke="#d4af37" stroke-width="3"/>
+                                    <path d="M18 30 L26 38 L42 22" stroke="#d4af37" stroke-width="4" fill="none"/>
+                                </svg>
+                                <h3>現在の地動説</h3>
+                                <p style="font-size:1.15rem;margin-top:15px">教科書に載る<br>当たり前の知識です</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="quote-box">
+                        <blockquote>今の常識が、<span class="highlight">本当に正しいとは限らない。</span><br><br>今の非常識が、<span class="highlight">未来の常識になることもある。</span></blockquote>
+                    </div>
+                    <p class="big-message">
+                        <svg viewBox="0 0 50 50" width="50" height="50" fill="none" style="vertical-align:middle;margin-right:10px" class="icon-pulse">
+                            <polygon points="25,5 28,18 42,18 31,27 35,40 25,32 15,40 19,27 8,18 22,18" fill="#d4af37"/>
+                        </svg>
+                        自分で考え、<br>疑問を持つこと
+                        <svg viewBox="0 0 50 50" width="50" height="50" fill="none" style="vertical-align:middle;margin-left:10px" class="icon-pulse">
+                            <polygon points="25,5 28,18 42,18 31,27 35,40 25,32 15,40 19,27 8,18 22,18" fill="#d4af37"/>
+                        </svg>
+                    </p>
+                    <p class="text-block" style="text-align:center"><span class="highlight">自分の目で見て、自分の頭で考えること</span>が大切です。</p>
+                    <div class="quote-box" style="margin-top:65px">
+                        <blockquote>「それでも地球は動く」<br><span style="font-size:0.85em;color:rgba(232,234,246,0.6)">― ガリレオ・ガリレイ（伝）</span></blockquote>
+                    </div>
+                    <p style="margin-top:70px;color:rgba(232,234,246,0.55);font-size:1rem">ご覧いただきありがとうございました。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 天動説と地動説 ― 非常識は、いつか常識になる</p>
+    </footer>
+    
+    <script>
+        // Generate Stars
+        const starsContainer = document.getElementById('starsContainer');
+        for(let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+            star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsContainer.appendChild(star);
+        }
+        
+        // Generate Particles
+        const particlesContainer = document.getElementById('particlesContainer');
+        for(let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.width = particle.style.height = (Math.random() * 4 + 2) + 'px';
+            particle.style.background = Math.random() > 0.5 ? 'rgba(212,175,55,0.6)' : 'rgba(138,43,226,0.6)';
+            particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        // Loading Animation
+        const loadingEl = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+        const progressEl = document.getElementById('progress');
+        const title = 'HELIOCENTRIC';
+        let progress = 0;
+        
+        const loadingInterval = setInterval(() => {
+            progress += 2;
+            progressEl.style.width = progress + '%';
+            
+            if(progress < 50) {
+                let binary = '';
+                for(let i = 0; i < 20; i++) binary += Math.random() > 0.5 ? '1' : '0';
+                loadingText.textContent = binary;
+            } else if(progress < 90) {
+                let t = '';
+                const reveal = Math.floor((progress - 50) / 40 * title.length);
+                for(let i = 0; i < title.length; i++) {
+                    t += i < reveal ? title[i] : (Math.random() > 0.5 ? '1' : '0');
+                }
+                loadingText.textContent = t;
+            } else {
+                loadingText.textContent = title;
+            }
+            
+            if(progress >= 100) {
+                clearInterval(loadingInterval);
+                setTimeout(() => {
+                    loadingText.innerHTML = '<div class="mission-complete">MISSION COMPLETE</div>';
+                    setTimeout(() => loadingEl.classList.add('hidden'), 1500);
+                }, 400);
+            }
+        }, 45);
+        
+        // Navigation
+        const nav = document.getElementById('nav');
+        const menuBtn = document.getElementById('menuBtn');
+        const navLinks = document.getElementById('navLinks');
+        
+        window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+        menuBtn.addEventListener('click', () => navLinks.classList.toggle('open'));
+        document.querySelectorAll('.nav-links a').forEach(link => 
+            link.addEventListener('click', () => navLinks.classList.remove('open'))
+        );
+        
+        // Section Observer
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.15 });
+        
+        document.querySelectorAll('.section-content').forEach(el => observer.observe(el));
+        
+        // Active Nav Link
+        const sections = document.querySelectorAll('section');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if(window.scrollY >= s.offsetTop - 200) current = s.id;
+            });
+            document.querySelectorAll('.nav-links a').forEach(link => 
+                link.classList.toggle('active', link.getAttribute('href') === '#' + current)
+            );
+        });
+    </script>
+</body>
+</html>
