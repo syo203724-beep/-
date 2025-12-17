@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ナレーション音声生成ツール</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f4d03f;
+            --bg-dark: #1a1a2e;
+            --bg-darker: #0f0f1a;
+            --text: #e8eaf6;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg-darker);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--gold);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 30px;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+
+        .settings-title {
+            color: var(--gold);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setting-group label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        select, input[type="number"], input[type="text"] {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        /* Status */
+        .status-bar {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--warning);
+        }
+
+        .status-indicator.connected { background: var(--success); }
+        .status-indicator.error { background: var(--danger); }
+
+        .status-text {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Scene List */
+        .scene-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .scene-item {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
+            transition: all 0.3s;
+        }
+
+        .scene-item:hover {
+            border-color: var(--gold);
+        }
+
+        .scene-item.generating {
+            border-color: var(--warning);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .scene-item.completed {
+            border-color: var(--success);
+        }
+
+        .scene-item.error {
+            border-color: var(--danger);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .scene-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .scene-title {
+            font-weight: 500;
+            color: var(--gold);
+        }
+
+        .scene-status {
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .scene-status.pending { background: rgba(255,255,255,0.1); }
+        .scene-status.generating { background: rgba(255,152,0,0.3); color: var(--warning); }
+        .scene-status.completed { background: rgba(76,175,80,0.3); color: var(--success); }
+        .scene-status.error { background: rgba(244,67,54,0.3); color: var(--danger); }
+
+        .scene-text {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .scene-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .scene-audio {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .scene-audio audio {
+            width: 100%;
+            height: 40px;
+        }
+
+        /* Batch Actions */
+        .batch-actions {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+
+        .batch-actions h3 {
+            color: var(--gold);
+            margin-right: auto;
+        }
+
+        /* Progress */
+        .progress-container {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(33,150,243,0.1);
+            border: 1px solid rgba(33,150,243,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #2196f3;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            opacity: 0.9;
+        }
+
+        .info-box code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .info-box a {
+            color: var(--gold);
+        }
+
+        /* TTS Mode Tabs */
+        .mode-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-tab {
+            padding: 12px 24px;
+            background: var(--bg-dark);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text);
+        }
+
+        .mode-tab:hover {
+            border-color: var(--gold);
+        }
+
+        .mode-tab.active {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+        }
+
+        /* Download All */
+        .download-all-section {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05));
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .download-all-section h3 {
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .batch-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .batch-actions h3 {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ナレーション音声生成ツール</h1>
+        <p class="subtitle">VOICEVOX または ブラウザTTS で音声を生成し、ダウンロード</p>
+
+        <!-- TTS Mode Selection -->
+        <div class="mode-tabs">
+            <div class="mode-tab active" data-mode="voicevox">VOICEVOX (高品質)</div>
+            <div class="mode-tab" data-mode="browser">ブラウザTTS</div>
+        </div>
+
+        <!-- VOICEVOX Info -->
+        <div class="info-box" id="voicevox-info">
+            <h3>VOICEVOX を使用する場合</h3>
+            <p>
+                1. <a href="https://voicevox.hiroshiba.jp/" target="_blank">VOICEVOX</a> をダウンロード・インストール<br>
+                2. VOICEVOX を起動（エンジンが自動で起動します）<br>
+                3. 下の「接続確認」ボタンを押して接続を確認<br>
+                4. キャラクターを選んで音声を生成<br><br>
+                <strong>API URL:</strong> <code>http://localhost:50021</code>
+            </p>
+        </div>
+
+        <!-- Browser TTS Info -->
+        <div class="info-box" id="browser-info" style="display:none;">
+            <h3>ブラウザTTS を使用する場合</h3>
+            <p>
+                ブラウザ内蔵の音声合成を使用します。<br>
+                音声の品質はブラウザとOSに依存します。<br>
+                生成した音声は直接ダウンロードできます。
+            </p>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator" id="status-indicator"></div>
+            <span class="status-text" id="status-text">接続を確認してください</span>
+            <button class="btn btn-secondary" id="check-connection">接続確認</button>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-panel">
+            <h3 class="settings-title">音声設定</h3>
+            <div class="settings-grid">
+                <div class="setting-group" id="voicevox-settings">
+                    <label>キャラクター</label>
+                    <select id="speaker-select">
+                        <option value="0">四国めたん（ノーマル）</option>
+                        <option value="1">四国めたん（あまあま）</option>
+                        <option value="2">四国めたん（ツンツン）</option>
+                        <option value="3">四国めたん（セクシー）</option>
+                        <option value="4">四国めたん（ささやき）</option>
+                        <option value="5">四国めたん（ヒソヒソ）</option>
+                        <option value="6">ずんだもん（ノーマル）</option>
+                        <option value="7">ずんだもん（あまあま）</option>
+                        <option value="8">ずんだもん（ツンツン）</option>
+                        <option value="9">ずんだもん（セクシー）</option>
+                        <option value="10">ずんだもん（ささやき）</option>
+                        <option value="11">ずんだもん（ヒソヒソ）</option>
+                        <option value="12">春日部つむぎ（ノーマル）</option>
+                        <option value="13">雨晴はう（ノーマル）</option>
+                        <option value="14">波音リツ（ノーマル）</option>
+                        <option value="47">ナースロボ＿タイプＴ</option>
+                    </select>
+                </div>
+                <div class="setting-group" id="browser-settings" style="display:none;">
+                    <label>音声</label>
+                    <select id="browser-voice-select">
+                        <option value="">読み込み中...</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>速度</label>
+                    <input type="number" id="speed" value="1.0" min="0.5" max="2.0" step="0.1">
+                </div>
+                <div class="setting-group">
+                    <label>音程</label>
+                    <input type="number" id="pitch" value="0" min="-0.15" max="0.15" step="0.01">
+                </div>
+                <div class="setting-group">
+                    <label>VOICEVOX API URL</label>
+                    <input type="text" id="api-url" value="http://localhost:50021">
+                </div>
+            </div>
+        </div>
+
+        <!-- Batch Actions -->
+        <div class="batch-actions">
+            <h3>一括操作</h3>
+            <button class="btn btn-primary" id="generate-all">全て生成</button>
+            <button class="btn btn-success" id="download-all" disabled>全てダウンロード (ZIP)</button>
+            <button class="btn btn-danger" id="clear-all">全てクリア</button>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-container" id="progress-container" style="display:none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0 / 16 完了</div>
+        </div>
+
+        <!-- Scene List -->
+        <div class="scene-list" id="scene-list"></div>
+
+        <!-- Download All Section -->
+        <div class="download-all-section" id="download-section" style="display:none;">
+            <h3>生成完了！</h3>
+            <p style="margin-bottom:15px;">全ての音声ファイルが生成されました</p>
+            <button class="btn btn-primary btn-lg" id="download-zip">ZIPでダウンロード</button>
+        </div>
+    </div>
+
+    <!-- JSZip Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script>
+        // Narration data
+        const scenes = [
+            { id: 0, file: "scene00.mp3", text: "天動説と地動説。非常識は、いつか常識になる。" },
+            { id: 1, file: "scene01.mp3", text: "突然ですが、あなたは「チ。」という漫画を知っていますか？チ。は弾圧されながらも地動説を信じて、証明しようとした人たちの物語です。" },
+            { id: 2, file: "scene02.mp3", text: "天動説とは、地球を中心に太陽や星々が回っているという考えです。目で感じたものを信じると、この説に行き着きました。そして長い間、権力や宗教によって正しいとされてきたのです。" },
+            { id: 3, file: "scene03.mp3", text: "なぜ天動説が信じられたのか。地面は動いているように感じない。太陽は毎日東から昇り西に沈む。星は毎晩規則正しく動いている。見たままを信じれば、天動説は自然な結論でした。" },
+            { id: 4, file: "scene04.mp3", text: "実は地球が動いているのではないか。そう考えた人たちが現れました。これが地動説です。" },
+            { id: 5, file: "scene05.mp3", text: "地球が自転すれば昼と夜が説明できる。地球が公転すれば季節の変化も説明できる。しかしこの考えは当時、とんでもない非常識でした。" },
+            { id: 6, file: "scene06.mp3", text: "革命を起こした科学者たち。コペルニクスは地動説を体系化し、ガリレオは望遠鏡で証拠を発見し、ケプラーは惑星運動の法則を発見しました。" },
+            { id: 7, file: "scene07.mp3", text: "すぐに「これが証拠だ」とは言えませんでした。観察、発明、理論、法則。何人もの人が、数百年をかけて証明したのです。" },
+            { id: 8, file: "scene08.mp3", text: "しかし、真実を語った者たちは大きな代償を払いました。考えを否定され、危険人物として扱われ、命を落とした者さえいました。" },
+            { id: 9, file: "scene09.mp3", text: "ジョルダーノ・ブルーノは1600年、火刑に処されました。正しいかどうかではなく、常識に逆らったかどうかで裁かれたのです。" },
+            { id: 10, file: "scene10.mp3", text: "それでも地球は動く。ガリレオは自身の信念を死ぬ寸前まで証明しようとしました。" },
+            { id: 11, file: "scene11.mp3", text: "漫画「チ。」は、知ることをあきらめない心、真実を考える勇気、世代を超えて受け継がれる思想。そんな人々の苦しさと情熱を描いています。" },
+            { id: 12, file: "scene12.mp3", text: "かつて地動説は、非常識で危険で間違いだと言われました。今では教科書に載る、当たり前の知識です。" },
+            { id: 13, file: "scene13.mp3", text: "今の常識が、本当に正しいとは限らない。今の非常識が、未来の常識になることもある。" },
+            { id: 14, file: "scene14.mp3", text: "自分の目で見て、自分の頭で考える。それが大切なのです。" },
+            { id: 15, file: "scene15.mp3", text: "ご清聴ありがとうございました。それでも地球は動く。" }
+        ];
+
+        // State
+        let ttsMode = 'voicevox';
+        let audioBlobs = {};
+        let isGenerating = false;
+        let browserVoices = [];
+
+        // DOM Elements
+        const sceneList = document.getElementById('scene-list');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const progressContainer = document.getElementById('progress-container');
+        const progressFill = document.getElementById('progress-fill');
+        const progressTextEl = document.getElementById('progress-text');
+        const downloadAllBtn = document.getElementById('download-all');
+        const downloadSection = document.getElementById('download-section');
+
+        // Initialize scene list
+        function initSceneList() {
+            sceneList.innerHTML = scenes.map(scene => `
+                <div class="scene-item" id="scene-item-${scene.id}" data-id="${scene.id}">
+                    <div class="scene-header">
+                        <span class="scene-title">${scene.file}</span>
+                        <span class="scene-status pending" id="status-${scene.id}">未生成</span>
+                    </div>
+                    <div class="scene-text">${scene.text}</div>
+                    <div class="scene-actions">
+                        <button class="btn btn-primary" onclick="generateSingle(${scene.id})">生成</button>
+                        <button class="btn btn-secondary" onclick="previewSingle(${scene.id})">プレビュー</button>
+                        <div class="scene-audio" id="audio-container-${scene.id}"></div>
+                        <button class="btn btn-success" id="download-btn-${scene.id}" onclick="downloadSingle(${scene.id})" disabled>ダウンロード</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Mode switching
+        document.querySelectorAll('.mode-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                ttsMode = tab.dataset.mode;
+
+                document.getElementById('voicevox-info').style.display = ttsMode === 'voicevox' ? 'block' : 'none';
+                document.getElementById('browser-info').style.display = ttsMode === 'browser' ? 'block' : 'none';
+                document.getElementById('voicevox-settings').style.display = ttsMode === 'voicevox' ? 'block' : 'none';
+                document.getElementById('browser-settings').style.display = ttsMode === 'browser' ? 'block' : 'none';
+
+                checkConnection();
+            });
+        });
+
+        // Load browser voices
+        function loadBrowserVoices() {
+            const synth = window.speechSynthesis;
+            browserVoices = synth.getVoices().filter(v => v.lang.includes('ja'));
+            const select = document.getElementById('browser-voice-select');
+            select.innerHTML = browserVoices.map((v, i) =>
+                `<option value="${i}">${v.name}</option>`
+            ).join('');
+        }
+
+        window.speechSynthesis.onvoiceschanged = loadBrowserVoices;
+        loadBrowserVoices();
+
+        // Check VOICEVOX connection
+        async function checkConnection() {
+            if (ttsMode === 'browser') {
+                statusIndicator.className = 'status-indicator connected';
+                statusText.textContent = 'ブラウザTTS 利用可能';
+                return true;
+            }
+
+            const apiUrl = document.getElementById('api-url').value;
+            try {
+                const response = await fetch(`${apiUrl}/speakers`);
+                if (response.ok) {
+                    const speakers = await response.json();
+                    statusIndicator.className = 'status-indicator connected';
+                    statusText.textContent = `VOICEVOX 接続成功 (${speakers.length} キャラクター)`;
+                    updateSpeakerList(speakers);
+                    return true;
+                }
+            } catch (e) {
+                console.error('Connection error:', e);
+            }
+
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'VOICEVOX に接続できません。起動していますか？';
+            return false;
+        }
+
+        function updateSpeakerList(speakers) {
+            const select = document.getElementById('speaker-select');
+            select.innerHTML = '';
+            speakers.forEach(speaker => {
+                speaker.styles.forEach(style => {
+                    const option = document.createElement('option');
+                    option.value = style.id;
+                    option.textContent = `${speaker.name}（${style.name}）`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        document.getElementById('check-connection').addEventListener('click', checkConnection);
+
+        // Generate audio with VOICEVOX
+        async function generateWithVoicevox(text, speakerId) {
+            const apiUrl = document.getElementById('api-url').value;
+            const speed = parseFloat(document.getElementById('speed').value);
+            const pitch = parseFloat(document.getElementById('pitch').value);
+
+            // Create audio query
+            const queryResponse = await fetch(
+                `${apiUrl}/audio_query?text=${encodeURIComponent(text)}&speaker=${speakerId}`,
+                { method: 'POST' }
+            );
+
+            if (!queryResponse.ok) throw new Error('Failed to create audio query');
+
+            const query = await queryResponse.json();
+            query.speedScale = speed;
+            query.pitchScale = pitch;
+
+            // Synthesize audio
+            const audioResponse = await fetch(
+                `${apiUrl}/synthesis?speaker=${speakerId}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(query)
+                }
+            );
+
+            if (!audioResponse.ok) throw new Error('Failed to synthesize audio');
+
+            return await audioResponse.blob();
+        }
+
+        // Generate audio with Browser TTS
+        async function generateWithBrowserTTS(text) {
+            return new Promise((resolve, reject) => {
+                const synth = window.speechSynthesis;
+                const voiceIndex = document.getElementById('browser-voice-select').value;
+                const voice = browserVoices[voiceIndex];
+                const speed = parseFloat(document.getElementById('speed').value);
+
+                // Create audio context for recording
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const destination = audioContext.createMediaStreamDestination();
+                const mediaRecorder = new MediaRecorder(destination.stream);
+                const chunks = [];
+
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    resolve(blob);
+                };
+
+                // Use oscillator to create a simple tone while TTS plays
+                // Note: This is a workaround since we can't directly capture system audio
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.voice = voice;
+                utterance.rate = speed;
+                utterance.lang = 'ja-JP';
+
+                // For browser TTS, we'll create a direct download approach
+                // Since we can't record system audio, we'll provide playback + manual recording instructions
+
+                utterance.onend = () => {
+                    // Create a simple audio indicator
+                    resolve(null); // Return null to indicate browser TTS mode
+                };
+
+                utterance.onerror = reject;
+
+                synth.speak(utterance);
+            });
+        }
+
+        // Generate single scene
+        async function generateSingle(id) {
+            const scene = scenes[id];
+            const item = document.getElementById(`scene-item-${id}`);
+            const statusEl = document.getElementById(`status-${id}`);
+            const downloadBtn = document.getElementById(`download-btn-${id}`);
+            const audioContainer = document.getElementById(`audio-container-${id}`);
+
+            item.className = 'scene-item generating';
+            statusEl.className = 'scene-status generating';
+            statusEl.textContent = '生成中...';
+
+            try {
+                let blob;
+
+                if (ttsMode === 'voicevox') {
+                    const speakerId = document.getElementById('speaker-select').value;
+                    blob = await generateWithVoicevox(scene.text, speakerId);
+                } else {
+                    // For browser TTS, just play the audio
+                    await generateWithBrowserTTS(scene.text);
+                    item.className = 'scene-item completed';
+                    statusEl.className = 'scene-status completed';
+                    statusEl.textContent = '再生完了（録音はできません）';
+                    return;
+                }
+
+                audioBlobs[id] = blob;
+
+                // Create audio element
+                const audioUrl = URL.createObjectURL(blob);
+                audioContainer.innerHTML = `<audio controls src="${audioUrl}"></audio>`;
+
+                item.className = 'scene-item completed';
+                statusEl.className = 'scene-status completed';
+                statusEl.textContent = '生成完了';
+                downloadBtn.disabled = false;
+
+                updateDownloadAllButton();
+
+            } catch (error) {
+                console.error('Generation error:', error);
+                item.className = 'scene-item error';
+                statusEl.className = 'scene-status error';
+                statusEl.textContent = 'エラー: ' + error.message;
+            }
+        }
+
+        // Preview single scene
+        function previewSingle(id) {
+            const scene = scenes[id];
+            const synth = window.speechSynthesis;
+
+            synth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(scene.text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = parseFloat(document.getElementById('speed').value);
+
+            if (ttsMode === 'browser') {
+                const voiceIndex = document.getElementById('browser-voice-select').value;
+                utterance.voice = browserVoices[voiceIndex];
+            }
+
+            synth.speak(utterance);
+        }
+
+        // Download single file
+        function downloadSingle(id) {
+            const blob = audioBlobs[id];
+            if (!blob) return;
+
+            const scene = scenes[id];
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = scene.file.replace('.mp3', '.wav'); // VOICEVOX outputs WAV
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Generate all
+        document.getElementById('generate-all').addEventListener('click', async () => {
+            if (isGenerating) return;
+
+            const connected = await checkConnection();
+            if (!connected && ttsMode === 'voicevox') {
+                alert('VOICEVOXに接続できません。起動してください。');
+                return;
+            }
+
+            isGenerating = true;
+            progressContainer.style.display = 'block';
+
+            for (let i = 0; i < scenes.length; i++) {
+                await generateSingle(i);
+                progressFill.style.width = ((i + 1) / scenes.length * 100) + '%';
+                progressTextEl.textContent = `${i + 1} / ${scenes.length} 完了`;
+
+                // Small delay between requests
+                await new Promise(r => setTimeout(r, 500));
+            }
+
+            isGenerating = false;
+
+            if (Object.keys(audioBlobs).length === scenes.length) {
+                downloadSection.style.display = 'block';
+            }
+        });
+
+        // Update download all button
+        function updateDownloadAllButton() {
+            const completedCount = Object.keys(audioBlobs).length;
+            downloadAllBtn.disabled = completedCount === 0;
+
+            if (completedCount === scenes.length) {
+                downloadSection.style.display = 'block';
+            }
+        }
+
+        // Download all as ZIP
+        async function downloadAllAsZip() {
+            const zip = new JSZip();
+            const audioFolder = zip.folder('audio');
+
+            for (const [id, blob] of Object.entries(audioBlobs)) {
+                const scene = scenes[id];
+                const filename = scene.file.replace('.mp3', '.wav');
+                audioFolder.file(filename, blob);
+            }
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'narration_audio.zip';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById('download-all').addEventListener('click', downloadAllAsZip);
+        document.getElementById('download-zip').addEventListener('click', downloadAllAsZip);
+
+        // Clear all
+        document.getElementById('clear-all').addEventListener('click', () => {
+            audioBlobs = {};
+            downloadSection.style.display = 'none';
+            progressContainer.style.display = 'none';
+            progressFill.style.width = '0%';
+            initSceneList();
+            updateDownloadAllButton();
+        });
+
+        // Initialize
+        initSceneList();
+        checkConnection();
+    </script>
+</body>
+</html>
