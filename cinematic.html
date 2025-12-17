@@ -382,27 +382,59 @@
             box-shadow: 0 0 50px rgba(212,175,55,0.5);
         }
 
-        .voice-select {
+        .audio-mode-select {
             margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
-        .voice-select label {
+        .audio-mode-select label {
             color: var(--text-white);
             opacity: 0.7;
         }
 
-        #voice-selector {
-            padding: 10px 20px;
+        .mode-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .mode-btn {
+            padding: 12px 25px;
             font-size: 1rem;
             background: rgba(255,255,255,0.1);
             border: 1px solid var(--gold);
             color: var(--text-white);
             border-radius: 8px;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover, .mode-btn.active {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .audio-status {
+            margin-top: 20px;
+            padding: 15px 25px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .audio-status.success {
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .audio-status.warning {
+            border: 1px solid #ff9800;
+            color: #ff9800;
         }
 
         /* Particle Effects */
@@ -472,6 +504,22 @@
             opacity: 1;
         }
 
+        /* Loading indicator */
+        .loading-audio {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--gold);
+            font-size: 1.2rem;
+            z-index: 600;
+            display: none;
+        }
+
+        .loading-audio.show {
+            display: block;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             #controls {
@@ -502,20 +550,32 @@
                 width: 90%;
                 max-width: 300px;
             }
+
+            .mode-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Loading -->
+    <div class="loading-audio" id="loading-audio">音声を読み込み中...</div>
+
     <!-- Start Screen -->
     <div id="start-screen">
         <h1>天動説と地動説</h1>
         <p>― 非常識は、いつか常識になる ―</p>
         <button id="start-btn">▶ 再生開始</button>
-        <div class="voice-select">
-            <label>ナレーション音声を選択</label>
-            <select id="voice-selector">
-                <option value="">読み込み中...</option>
-            </select>
+        <div class="audio-mode-select">
+            <label>音声モードを選択</label>
+            <div class="mode-buttons">
+                <button class="mode-btn active" data-mode="file">音声ファイル (推奨)</button>
+                <button class="mode-btn" data-mode="tts">ブラウザTTS</button>
+                <button class="mode-btn" data-mode="silent">字幕のみ</button>
+            </div>
+            <div class="audio-status" id="audio-status">
+                音声ファイルを確認中...
+            </div>
         </div>
     </div>
 
@@ -774,88 +834,107 @@
         </div>
     </div>
 
+    <!-- Audio Elements (for pre-recorded narration) -->
+    <div id="audio-container" style="display:none;"></div>
+
     <script>
         // Narration Script Data
         const scenes = [
             {
                 id: 0,
                 duration: 6000,
-                narration: "天動説と地動説。非常識は、いつか常識になる。"
+                narration: "天動説と地動説。非常識は、いつか常識になる。",
+                audioFile: "audio/scene00.mp3"
             },
             {
                 id: 1,
                 duration: 10000,
-                narration: "突然ですが、あなたは「チ。」という漫画を知っていますか？チ。は弾圧されながらも地動説を信じて、証明しようとした人たちの物語です。"
+                narration: "突然ですが、あなたは「チ。」という漫画を知っていますか？チ。は弾圧されながらも地動説を信じて、証明しようとした人たちの物語です。",
+                audioFile: "audio/scene01.mp3"
             },
             {
                 id: 2,
                 duration: 12000,
-                narration: "天動説とは、地球を中心に太陽や星々が回っているという考えです。目で感じたものを信じると、この説に行き着きました。そして長い間、権力や宗教によって正しいとされてきたのです。"
+                narration: "天動説とは、地球を中心に太陽や星々が回っているという考えです。目で感じたものを信じると、この説に行き着きました。そして長い間、権力や宗教によって正しいとされてきたのです。",
+                audioFile: "audio/scene02.mp3"
             },
             {
                 id: 3,
                 duration: 12000,
-                narration: "なぜ天動説が信じられたのか。地面は動いているように感じない。太陽は毎日東から昇り西に沈む。星は毎晩規則正しく動いている。見たままを信じれば、天動説は自然な結論でした。"
+                narration: "なぜ天動説が信じられたのか。地面は動いているように感じない。太陽は毎日東から昇り西に沈む。星は毎晩規則正しく動いている。見たままを信じれば、天動説は自然な結論でした。",
+                audioFile: "audio/scene03.mp3"
             },
             {
                 id: 4,
                 duration: 8000,
-                narration: "実は地球が動いているのではないか。そう考えた人たちが現れました。これが地動説です。"
+                narration: "実は地球が動いているのではないか。そう考えた人たちが現れました。これが地動説です。",
+                audioFile: "audio/scene04.mp3"
             },
             {
                 id: 5,
                 duration: 12000,
-                narration: "地球が自転すれば昼と夜が説明できる。地球が公転すれば季節の変化も説明できる。しかしこの考えは当時、とんでもない非常識でした。"
+                narration: "地球が自転すれば昼と夜が説明できる。地球が公転すれば季節の変化も説明できる。しかしこの考えは当時、とんでもない非常識でした。",
+                audioFile: "audio/scene05.mp3"
             },
             {
                 id: 6,
                 duration: 12000,
-                narration: "革命を起こした科学者たち。コペルニクスは地動説を体系化し、ガリレオは望遠鏡で証拠を発見し、ケプラーは惑星運動の法則を発見しました。"
+                narration: "革命を起こした科学者たち。コペルニクスは地動説を体系化し、ガリレオは望遠鏡で証拠を発見し、ケプラーは惑星運動の法則を発見しました。",
+                audioFile: "audio/scene06.mp3"
             },
             {
                 id: 7,
                 duration: 10000,
-                narration: "すぐに「これが証拠だ」とは言えませんでした。観察、発明、理論、法則。何人もの人が、数百年をかけて証明したのです。"
+                narration: "すぐに「これが証拠だ」とは言えませんでした。観察、発明、理論、法則。何人もの人が、数百年をかけて証明したのです。",
+                audioFile: "audio/scene07.mp3"
             },
             {
                 id: 8,
                 duration: 10000,
-                narration: "しかし、真実を語った者たちは大きな代償を払いました。考えを否定され、危険人物として扱われ、命を落とした者さえいました。"
+                narration: "しかし、真実を語った者たちは大きな代償を払いました。考えを否定され、危険人物として扱われ、命を落とした者さえいました。",
+                audioFile: "audio/scene08.mp3"
             },
             {
                 id: 9,
                 duration: 10000,
-                narration: "ジョルダーノ・ブルーノは1600年、火刑に処されました。正しいかどうかではなく、常識に逆らったかどうかで裁かれたのです。"
+                narration: "ジョルダーノ・ブルーノは1600年、火刑に処されました。正しいかどうかではなく、常識に逆らったかどうかで裁かれたのです。",
+                audioFile: "audio/scene09.mp3"
             },
             {
                 id: 10,
                 duration: 8000,
-                narration: "それでも地球は動く。ガリレオは自身の信念を死ぬ寸前まで証明しようとしました。"
+                narration: "それでも地球は動く。ガリレオは自身の信念を死ぬ寸前まで証明しようとしました。",
+                audioFile: "audio/scene10.mp3"
             },
             {
                 id: 11,
                 duration: 10000,
-                narration: "漫画「チ。」は、知ることをあきらめない心、真実を考える勇気、世代を超えて受け継がれる思想。そんな人々の苦しさと情熱を描いています。"
+                narration: "漫画「チ。」は、知ることをあきらめない心、真実を考える勇気、世代を超えて受け継がれる思想。そんな人々の苦しさと情熱を描いています。",
+                audioFile: "audio/scene11.mp3"
             },
             {
                 id: 12,
                 duration: 10000,
-                narration: "かつて地動説は、非常識で危険で間違いだと言われました。今では教科書に載る、当たり前の知識です。"
+                narration: "かつて地動説は、非常識で危険で間違いだと言われました。今では教科書に載る、当たり前の知識です。",
+                audioFile: "audio/scene12.mp3"
             },
             {
                 id: 13,
                 duration: 10000,
-                narration: "今の常識が、本当に正しいとは限らない。今の非常識が、未来の常識になることもある。"
+                narration: "今の常識が、本当に正しいとは限らない。今の非常識が、未来の常識になることもある。",
+                audioFile: "audio/scene13.mp3"
             },
             {
                 id: 14,
                 duration: 8000,
-                narration: "自分の目で見て、自分の頭で考える。それが大切なのです。"
+                narration: "自分の目で見て、自分の頭で考える。それが大切なのです。",
+                audioFile: "audio/scene14.mp3"
             },
             {
                 id: 15,
                 duration: 8000,
-                narration: "ご清聴ありがとうございました。それでも地球は動く。"
+                narration: "ご清聴ありがとうございました。それでも地球は動く。",
+                audioFile: "audio/scene15.mp3"
             }
         ];
 
@@ -863,17 +942,20 @@
         let currentScene = 0;
         let isPlaying = false;
         let sceneTimer = null;
-        let elapsedTime = 0;
         let totalDuration = scenes.reduce((sum, s) => sum + s.duration, 0);
         let speechSynth = window.speechSynthesis;
         let selectedVoice = null;
         let isMuted = false;
         let volume = 0.8;
+        let audioMode = 'file'; // 'file', 'tts', 'silent'
+        let audioElements = {};
+        let audioFilesAvailable = false;
+        let currentAudio = null;
 
         // DOM Elements
         const startScreen = document.getElementById('start-screen');
         const startBtn = document.getElementById('start-btn');
-        const voiceSelector = document.getElementById('voice-selector');
+        const audioStatus = document.getElementById('audio-status');
         const playBtn = document.getElementById('play-btn');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
@@ -885,35 +967,69 @@
         const muteBtn = document.getElementById('mute-btn');
         const volumeSlider = document.getElementById('volume-slider');
         const transitionEl = document.getElementById('transition');
+        const loadingAudio = document.getElementById('loading-audio');
+        const modeButtons = document.querySelectorAll('.mode-btn');
 
-        // Initialize voices
+        // Check if audio files exist
+        async function checkAudioFiles() {
+            let availableCount = 0;
+            const audioContainer = document.getElementById('audio-container');
+
+            for (let i = 0; i < scenes.length; i++) {
+                const scene = scenes[i];
+                try {
+                    const response = await fetch(scene.audioFile, { method: 'HEAD' });
+                    if (response.ok) {
+                        availableCount++;
+                        // Pre-create audio element
+                        const audio = new Audio(scene.audioFile);
+                        audio.preload = 'auto';
+                        audioElements[i] = audio;
+                    }
+                } catch (e) {
+                    // File not available
+                }
+            }
+
+            audioFilesAvailable = availableCount > 0;
+
+            if (availableCount === scenes.length) {
+                audioStatus.textContent = `✓ 全${scenes.length}個の音声ファイルが利用可能です`;
+                audioStatus.className = 'audio-status success';
+            } else if (availableCount > 0) {
+                audioStatus.textContent = `△ ${availableCount}/${scenes.length} の音声ファイルが見つかりました`;
+                audioStatus.className = 'audio-status warning';
+            } else {
+                audioStatus.innerHTML = `
+                    音声ファイルが見つかりません。<br>
+                    <small>audio/ フォルダに scene00.mp3 〜 scene15.mp3 を配置するか、<br>
+                    「ブラウザTTS」または「字幕のみ」を選択してください。</small>
+                `;
+                audioStatus.className = 'audio-status warning';
+                // Auto-select TTS mode if no audio files
+                document.querySelector('[data-mode="tts"]').click();
+            }
+        }
+
+        // Initialize voices for TTS mode
         function loadVoices() {
             const voices = speechSynth.getVoices();
             const japaneseVoices = voices.filter(v => v.lang.includes('ja'));
-
-            voiceSelector.innerHTML = '';
-
-            if (japaneseVoices.length === 0) {
-                voiceSelector.innerHTML = '<option value="">日本語音声が見つかりません</option>';
-                return;
+            if (japaneseVoices.length > 0) {
+                selectedVoice = japaneseVoices[0];
             }
-
-            japaneseVoices.forEach((voice, i) => {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = `${voice.name} (${voice.lang})`;
-                voiceSelector.appendChild(option);
-            });
-
-            selectedVoice = japaneseVoices[0];
         }
 
         speechSynth.onvoiceschanged = loadVoices;
         loadVoices();
 
-        voiceSelector.addEventListener('change', () => {
-            const voices = speechSynth.getVoices().filter(v => v.lang.includes('ja'));
-            selectedVoice = voices[voiceSelector.value] || voices[0];
+        // Mode selection
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                audioMode = btn.dataset.mode;
+            });
         });
 
         // Create particles
@@ -952,11 +1068,44 @@
             playBtn.textContent = isPlaying ? '⏸' : '▶';
         }
 
-        // Speak narration
-        function speak(text) {
+        // Stop all audio
+        function stopAllAudio() {
+            // Stop TTS
             speechSynth.cancel();
 
-            if (isMuted || !text) return;
+            // Stop current audio file
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+        }
+
+        // Play narration
+        function playNarration(sceneIndex) {
+            stopAllAudio();
+
+            if (isMuted || audioMode === 'silent') return;
+
+            const scene = scenes[sceneIndex];
+
+            if (audioMode === 'file' && audioElements[sceneIndex]) {
+                // Play audio file
+                currentAudio = audioElements[sceneIndex];
+                currentAudio.volume = volume;
+                currentAudio.currentTime = 0;
+                currentAudio.play().catch(e => {
+                    console.log('Audio play failed, falling back to TTS');
+                    playTTS(scene.narration);
+                });
+            } else if (audioMode === 'tts') {
+                playTTS(scene.narration);
+            }
+        }
+
+        // Play TTS
+        function playTTS(text) {
+            if (!text || isMuted) return;
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.voice = selectedVoice;
@@ -983,7 +1132,7 @@
             if (index < 0 || index >= scenes.length) return;
 
             clearTimeout(sceneTimer);
-            speechSynth.cancel();
+            stopAllAudio();
 
             const doTransition = () => {
                 // Hide all scenes
@@ -1003,13 +1152,23 @@
                 // Narration and subtitle
                 const scene = scenes[index];
                 showSubtitle(scene.narration);
-                speak(scene.narration);
+                playNarration(index);
 
                 // Auto advance if playing
                 if (isPlaying && currentScene < scenes.length - 1) {
+                    // If using audio file, sync with audio duration
+                    let duration = scene.duration;
+
+                    if (audioMode === 'file' && audioElements[index]) {
+                        const audio = audioElements[index];
+                        if (audio.duration && !isNaN(audio.duration)) {
+                            duration = Math.max(audio.duration * 1000 + 1000, scene.duration);
+                        }
+                    }
+
                     sceneTimer = setTimeout(() => {
                         goToScene(currentScene + 1);
-                    }, scene.duration);
+                    }, duration);
                 } else if (currentScene === scenes.length - 1) {
                     // End of video
                     setTimeout(() => {
@@ -1042,7 +1201,7 @@
                 goToScene(currentScene, false);
             } else {
                 clearTimeout(sceneTimer);
-                speechSynth.cancel();
+                stopAllAudio();
             }
 
             updateUI();
@@ -1084,12 +1243,15 @@
             isMuted = !isMuted;
             muteBtn.textContent = isMuted ? '🔇' : '🔊';
             if (isMuted) {
-                speechSynth.cancel();
+                stopAllAudio();
             }
         });
 
         volumeSlider.addEventListener('input', () => {
             volume = volumeSlider.value / 100;
+            if (currentAudio) {
+                currentAudio.volume = volume;
+            }
         });
 
         // Keyboard shortcuts
@@ -1116,6 +1278,7 @@
         });
 
         // Initialize
+        checkAudioFiles();
         updateUI();
     </script>
 </body>
